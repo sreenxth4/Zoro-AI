@@ -53,8 +53,8 @@ def generate_code():
             "explanation": explanation
         })
     except Exception as e:
-    traceback.print_exc()  # This will print the full error in Render logs
-    return jsonify({"error": str(e)}), 500
+        traceback.print_exc()  # This will print the full error in Render logs
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
