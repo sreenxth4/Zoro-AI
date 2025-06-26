@@ -10,7 +10,7 @@ CORS(app)  # Enable cross-origin requests
 
 # Configure OpenAI API with your key from environment variable
 API_KEY = os.getenv("OPENAI_API_KEY")
-openai.api_key = API_KEY
+client = openai.OpenAI(api_key=API_KEY)
 
 @app.route("/", methods=["GET"])
 def home():
@@ -33,7 +33,7 @@ def generate_code():
     )
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": system_instruction},
@@ -41,7 +41,6 @@ def generate_code():
             ],
             temperature=0.7
         )
-
 
         raw_output = response.choices[0].message.content.strip()
 
