@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import google.generativeai as genai
+import openai
 import os
 import re
 import traceback
@@ -8,9 +8,9 @@ import traceback
 app = Flask(__name__)
 CORS(app)  # Enable cross-origin requests
 
-# Configure Google Generative AI API with your actual API key
-API_KEY = os.getenv("GEMINI_API_KEY")  # Replace with your real key
-genai.configure(api_key=API_KEY)
+# Configure OpenAI API with your key from environment variable
+API_KEY = os.getenv("OPENAI_API_KEY")
+openai.api_key = API_KEY
 
 @app.route("/", methods=["GET"])
 def home():
@@ -32,14 +32,18 @@ def generate_code():
         "Do not include any other text."
     )
 
-    full_prompt = f"{system_instruction}\nUser Prompt: {prompt}"
-
     try:
-        model = genai.GenerativeModel("gemini-1.5-pro")
-        response = model.generate_content(full_prompt)
-        raw_output = response.text.strip()
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": system_instruction},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7
+        )
 
-        # Updated regex to capture ANY language, not just HTML
+        raw_output = response.choices[0].message.content.strip()
+
         code_block_match = re.search(r"CODE:\s*```(\w+)\s*(.*?)\s*```", raw_output, re.DOTALL | re.IGNORECASE)
         explanation_match = re.search(r"EXPLANATION:\s*(.*)", raw_output, re.DOTALL | re.IGNORECASE)
 
@@ -53,7 +57,7 @@ def generate_code():
             "explanation": explanation
         })
     except Exception as e:
-        traceback.print_exc()  # This will print the full error in Render logs
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
