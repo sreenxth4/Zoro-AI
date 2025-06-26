@@ -33,7 +33,7 @@ def generate_code():
     )
 
     try:
-        response = openai.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": system_instruction},
@@ -41,6 +41,7 @@ def generate_code():
             ],
             temperature=0.7
         )
+
 
         raw_output = response.choices[0].message.content.strip()
 
