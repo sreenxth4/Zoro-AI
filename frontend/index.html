@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Code Generator</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- PrismJS Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism-tomorrow.min.css" />
+  <link rel="stylesheet" href="main.css"/>
+</head>
+<body>
+  <div class="animated-background" id="animatedBackground"></div>
+  <div class="scanline"></div>
+  <div class="floating-robot" id="floatingRobot"><i class="fas fa-robot"></i></div>
+  
+  <div class="custom-alert-overlay" id="alertOverlay">
+    <div class="custom-alert" id="customAlert">
+      <div class="custom-alert-icon">
+        <i class="fas fa-info-circle"></i>
+      </div>
+      <div class="custom-alert-title">Information</div>
+      <div class="custom-alert-message" id="alertMessage"></div>
+      <button class="custom-alert-button" onclick="closeAlert()">OK</button>
+    </div>
+  </div>
+  
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-robot"></i> Zoro AI
+      </a>
+      <div class="ml-auto">
+        <button class="btn btn-sm btn-outline-light nav-btn" onclick="scrollToAboutMe()">
+          <i class="fas fa-user-circle"></i> About Me
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Add this section right after the navbar and before the container mt-5 -->
+  <div class="hero-container">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-10 text-center">
+          <div class="hero-content">
+            <h1 class="hero-title">Welcome to Zoro AI, Your AI Coding Assistant</h1>
+            <p class="hero-description">Transform your ideas into code with Zoro AI. The advanced artificial intelligence generates clean, efficient code based on your natural language descriptions.</p>
+            <button class="btn btn-lg btn-primary hero-btn" onclick="scrollToGenerator()">
+              <i class="fas fa-code"></i> Try Zoro Now
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card p-4 glow">
+          <div class="radar-pulse" style="top: 50%; left: 50%;"></div>
+          <h4 class="card-title"><i class="fas fa-terminal"></i> Enter Your Prompt</h4>
+          <div class="input-group">
+            <input type="text" id="promptInput" class="form-control" placeholder="Describe the code you need..." />
+            <div class="input-group-append">
+              <div class="tooltip-container">
+                <button class="btn btn-outline-secondary pulse-btn" type="button" id="suggestionBtn">
+                  <i class="fas fa-lightbulb"></i>
+                </button>
+                <span class="tooltip-text">Try: "Create a responsive navbar with dropdown" or "Build a contact form with validation"</span>
+              </div>
+            </div>
+          </div>
+          <button id="generateBtn" onclick="startGeneration()" class="btn btn-primary btn-block mt-4 code-btn">
+            <div class="btn-content">
+              <i class="fas fa-code"></i> Generate Code
+            </div>
+            <div class="hover-content">
+              <i class="fas fa-cog fa-spin"></i> Generating...
+            </div>
+            <div class="code-animation-wrapper">
+              <div class="code-animation">function generateCode() { return AI.create(prompt); }</div>
+              <div class="code-symbols" id="codeSymbols"></div>
+            </div>
+          </button>
+          <div class="scroll-indicator-container" id="scrollIndicator">
+            <div class="scroll-indicator" onclick="scrollToOutput()">
+              <i class="fas fa-arrow-down"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-4 mt-4 glow-effect">
+          <h5><i class="fas fa-file-code"></i> Generated Output</h5>
+          <div class="code-container">
+            <div class="btn-group-container" id="btnGroup">
+              <button class="btn btn-sm btn-warning" onclick="previewCode()">
+                <i class="fas fa-eye"></i> Preview
+              </button>
+              <button class="btn btn-sm btn-secondary" onclick="copyCode()">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+              <button class="btn btn-sm btn-info" onclick="downloadCode()">
+                <i class="fas fa-download"></i> Download
+              </button>
+            </div>
+            <pre><code id="codeOutput" class="language-html"></code></pre>
+          </div>
+          <h6><i class="fas fa-comment-alt"></i> Explanation</h6>
+          <textarea id="explanation" rows="4" readonly></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add this new section after the existing container but before the closing body tag -->
+  <div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <div class="section-header">
+          <h3><i class="fas fa-book-open"></i> Code Examples Gallery</h3>
+          <p>Browse through our collection of pre-built code snippets for common web development tasks</p>
+        </div>
+        
+        <div class="examples-container">
+          <div class="row">
+            <!-- Example Card 1 -->
+            <div class="col-md-4 mb-4">
+              <div class="example-card">
+                <div class="example-icon">
+                  <i class="fas fa-columns"></i>
+                </div>
+                <h5>Responsive Layout</h5>
+                <p>Grid-based layouts that adapt to any screen size</p>
+                <button class="btn btn-sm btn-outline-primary" onclick="loadExample('responsive-layout')">
+                  <i class="fas fa-code"></i> Use Template
+                </button>
+              </div>
+            </div>
+            
+            <!-- Example Card 2 -->
+            <div class="col-md-4 mb-4">
+              <div class="example-card">
+                <div class="example-icon">
+                  <i class="fas fa-user-circle"></i>
+                </div>
+                <h5>User Authentication</h5>
+                <p>Login and registration forms with validation</p>
+                <button class="btn btn-sm btn-outline-primary" onclick="loadExample('user-auth')">
+                  <i class="fas fa-code"></i> Use Template
+                </button>
+              </div>
+            </div>
+            
+            <!-- Example Card 3 -->
+            <div class="col-md-4 mb-4">
+              <div class="example-card">
+                <div class="example-icon">
+                  <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h5>E-commerce Components</h5>
+                <p>Product cards, carts and checkout flows</p>
+                <button class="btn btn-sm btn-outline-primary" onclick="loadExample('ecommerce')">
+                  <i class="fas fa-code"></i> Use Template
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <!-- Example Card 4 -->
+            <div class="col-md-4 mb-4">
+              <div class="example-card">
+                <div class="example-icon">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+                <h5>Data Visualization</h5>
+                <p>Charts and graphs for displaying data</p>
+                <button class="btn btn-sm btn-outline-primary" onclick="loadExample('data-viz')">
+                  <i class="fas fa-code"></i> Use Template
+                </button>
+              </div>
+            </div>
+            
+            <!-- Example Card 5 -->
+            <div class="col-md-4 mb-4">
+              <div class="example-card">
+                <div class="example-icon">
+                  <i class="fas fa-images"></i>
+                </div>
+                <h5>Image Galleries</h5>
+                <p>Responsive image grids and carousels</p>
+                <button class="btn btn-sm btn-outline-primary" onclick="loadExample('image-gallery')">
+                  <i class="fas fa-code"></i> Use Template
+                </button>
+              </div>
+            </div>
+            
+            <!-- Example Card 6 -->
+            <div class="col-md-4 mb-4">
+              <div class="example-card">
+                <div class="example-icon">
+                  <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h5>Mobile Components</h5>
+                <p>Touch-friendly UI elements for mobile apps</p>
+                <button class="btn btn-sm btn-outline-primary" onclick="loadExample('mobile-ui')">
+                  <i class="fas fa-code"></i> Use Template
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add this section right before the closing body tag -->
+  <div class="container-fluid credit-section mt-5">
+    <div class="container py-5">
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <div class="creator-info">
+            <h3 class="section-title">About Me</h3>
+            <div class="creator-divider mx-auto"></div>
+            <hr class="creator-separator">
+            <div class="creator-header text-left">
+              <h4 class="creator-name">Sreenath Dasari</h4>
+              <p class="creator-email"><i class="fas fa-envelope"></i>sreenathdasari2005@gmail.com</p>
+            </div>
+            <p class="creator-bio">
+              I'm a passionate computer science enthusiast with a deep love for building innovative solutions. Every line of code I write fuels my curiosity and drives me to explore new technological frontiers.
+            </p>
+            <p class="creator-bio">
+              I've created this project not just as a tool for generating code, but as a testament to my passion for technology and problem-solving. I believe that technology has the power to transform the world, and I'm excited to be a part of that transformation.
+            </p>
+            <div class="creator-social">
+              <a href="https://www.linkedin.com/in/sreenathdasari/" class="contact-btn" target="_blank">
+                <i class="fab fa-linkedin-in"></i> Contact Me
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/prism.min.js"></script>
+  <script>
+    const BACKEND_URL = "http://192.168.217.121:5000/generate";
+    
+    // Custom Alert Functions
+    function showAlert(message, type = 'info', title = '') {
+      const alertOverlay = document.getElementById('alertOverlay');
+      const customAlert = document.getElementById('customAlert');
+      const alertMessage = document.getElementById('alertMessage');
+      const alertIcon = customAlert.querySelector('.custom-alert-icon i');
+      const alertTitle = customAlert.querySelector('.custom-alert-title');
+      
+      // Reset classes
+      customAlert.className = 'custom-alert';
+      
+      // Set message
+      alertMessage.textContent = message;
+      
+      // Set type-specific properties
+      switch(type) {
+        case 'success':
+          customAlert.classList.add('success');
+          alertIcon.className = 'fas fa-check-circle';
+          alertTitle.textContent = title || 'Success';
+          break;
+        case 'error':
+          customAlert.classList.add('error');
+          alertIcon.className = 'fas fa-exclamation-circle';
+          alertTitle.textContent = title || 'Error';
+          break;
+        case 'warning':
+          customAlert.classList.add('warning');
+          alertIcon.className = 'fas fa-exclamation-triangle';
+          alertTitle.textContent = title || 'Warning';
+          break;
+        default:
+          alertIcon.className = 'fas fa-info-circle';
+          alertTitle.textContent = title || 'Information';
+      }
+      
+      // Show the alert
+      alertOverlay.classList.add('active');
+      setTimeout(() => {
+        customAlert.classList.add('active');
+      }, 10);
+    }
+    
+    function closeAlert() {
+      const alertOverlay = document.getElementById('alertOverlay');
+      const customAlert = document.getElementById('customAlert');
+      
+      customAlert.classList.remove('active');
+      setTimeout(() => {
+        alertOverlay.classList.remove('active');
+      }, 300);
+    }
+    
+    // Toast notification
+    function showToast(message, type = 'info', duration = 3000) {
+      // Remove existing toasts
+      const existingToast = document.querySelector('.toast-notification');
+      if (existingToast) {
+        existingToast.remove();
+      }
+      
+      // Create new toast
+      const toast = document.createElement('div');
+      toast.className = 'toast-notification';
+      
+      // Set icon based on type
+      let icon = 'info-circle';
+      if (type === 'success') {
+        toast.classList.add('success');
+        icon = 'check-circle';
+      } else if (type === 'error') {
+        toast.classList.add('error');
+        icon = 'exclamation-circle';
+      } else if (type === 'warning') {
+        toast.classList.add('warning');
+        icon = 'exclamation-triangle';
+      }
+      
+      toast.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
+      document.body.appendChild(toast);
+      
+      // Show toast
+      setTimeout(() => {
+        toast.classList.add('active');
+      }, 10);
+      
+      // Hide toast after duration
+      setTimeout(() => {
+        toast.classList.remove('active');
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, duration);
+    }
+    
+    // Background animation setup
+    function setupBackgroundAnimations() {
+      const background = document.getElementById('animatedBackground');
+      
+      // Create particles
+      for (let i = 0; i < 30; i++) {
+        createParticle(background);
+      }
+      
+      // Create grid lines
+      for (let i = 1; i < 10; i++) {
+        createGridLine(background, 'horizontal', i * 10);
+        createGridLine(background, 'vertical', i * 10);
+      }
+      
+      // Create floating cubes
+      for (let i = 0; i < 5; i++) {
+        createFloatingCube(background);
+      }
+      
+      // Create circle pulses
+      for (let i = 0; i < 3; i++) {
+        createCirclePulse(background);
+      }
+      
+      // Create data streams
+      for (let i = 0; i < 8; i++) {
+        createDataStream(background);
+      }
+    }
+    
+    function createParticle(parent) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      
+      // Random size between 2 and 6px
+      const size = Math.random() * 4 + 2;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      
+      // Random position
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.top = `${Math.random() * 100}%`;
+      
+      // Random opacity
+      particle.style.opacity = Math.random() * 0.5 + 0.1;
+      
+      // Animation
+      particle.style.animation = `pulse ${Math.random() * 4 + 2}s infinite alternate`;
+      
+      parent.appendChild(particle);
+    }
+    
+    function createGridLine(parent, direction, position) {
+      const line = document.createElement('div');
+      line.className = `grid-line ${direction === 'horizontal' ? 'horizontal-line' : 'vertical-line'}`;
+      
+      if (direction === 'horizontal') {
+        line.style.top = `${position}%`;
+        line.style.animationDelay = `${position / 10}s`;
+      } else {
+        line.style.left = `${position}%`;
+        line.style.animationDelay = `${position / 10}s`;
+      }
+      
+      parent.appendChild(line);
+    }
+    
+    function createFloatingCube(parent) {
+      const cube = document.createElement('div');
+      cube.className = 'floating-cube';
+      
+      // Random position
+      cube.style.left = `${Math.random() * 90 + 5}%`;
+      cube.style.top = `${Math.random() * 90 + 5}%`;
+      
+      // Random size
+      const size = Math.random() * 30 + 20;
+      cube.style.width = `${size}px`;
+      cube.style.height = `${size}px`;
+      
+      // Random animation duration and delay
+      const duration = Math.random() * 10 + 10;
+      const delay = Math.random() * 5;
+      cube.style.animation = `float ${duration}s infinite linear ${delay}s`;
+      
+      // Random rotation
+      cube.style.transform = `rotate(${Math.random() * 360}deg)`;
+      
+      parent.appendChild(cube);
+    }
+    
+    function createCirclePulse(parent) {
+      const circle = document.createElement('div');
+      circle.className = 'circle-pulse';
+      
+      // Random position
+      circle.style.left = `${Math.random() * 100}%`;
+      circle.style.top = `${Math.random() * 100}%`;
+      
+      // Random animation duration and delay
+      const duration = Math.random() * 4 + 3;
+      const delay = Math.random() * 2;
+      circle.style.animation = `pulse-ring ${duration}s infinite ${delay}s`;
+      
+      parent.appendChild(circle);
+    }
+    
+    function createDataStream(parent) {
+      const stream = document.createElement('div');
+      stream.className = 'data-stream';
+      
+      // Generate random binary/hex data
+      let data = '';
+      const chars = '01';
+      for (let i = 0; i < 100; i++) {
+        data += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      stream.textContent = data;
+      
+      // Random position
+      stream.style.left = `${Math.random() * 90}%`;
+      
+      // Random animation duration and delay
+      const duration = Math.random() * 15 + 10;
+      const delay = Math.random() * 5;
+      stream.style.animation = `stream-data ${duration}s linear infinite ${delay}s`;
+      
+      parent.appendChild(stream);
+    }
+    
+    function isFrontEndCode(code) {
+      return /<html|<body|<head>/i.test(code);
+    }
+
+    // New function to handle the button click and animation
+    async function startGeneration() {
+      const prompt = document.getElementById("promptInput").value.trim();
+      if (!prompt) {
+        showAlert("Please enter a prompt to generate code.", "warning", "Empty Prompt");
+        return;
+      }
+      
+      // Start the button animation
+      const generateBtn = document.getElementById("generateBtn");
+      generateBtn.classList.add("animating");
+      
+      // Clear previous output
+      const codeOutput = document.getElementById("codeOutput");
+      codeOutput.innerHTML = 'Preparing your code... <div class="typing-indicator"><span></span><span></span><span></span></div>';
+      codeOutput.classList.add("generating");
+      document.getElementById("explanation").value = "";
+      document.getElementById("btnGroup").style.display = "none";
+      
+      // Call the actual code generation function after a short delay to show the animation
+      setTimeout(() => {
+        generateCode(prompt);
+      }, 1500); // Show animation for 1.5 seconds before starting the actual request
+    }
+    
+    // Add this function to your existing JavaScript
+    function adjustTextareaHeight(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = (textarea.scrollHeight) + 'px';
+    }
+    
+    // Modify the generateCode function to adjust heights after content is loaded
+    async function generateCode(prompt) {
+        try {
+            const response = await fetch(BACKEND_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt })
+            });
+            
+            const data = await response.json();
+            let code = data.code || "";
+            let explanation = data.explanation || "No explanation provided.";
+            
+            code = code.replace(/```html\s*/i, "").replace(/```/g, "").trim();
+            
+            const codeOutput = document.getElementById("codeOutput");
+            codeOutput.textContent = code;
+            codeOutput.classList.remove("generating");
+            
+            const explanationTextarea = document.getElementById("explanation");
+            explanationTextarea.value = explanation;
+            
+            // Adjust the height of the explanation textarea
+            adjustTextareaHeight(explanationTextarea);
+            
+            document.getElementById("btnGroup").style.display = isFrontEndCode(code) ? "flex" : "none";
+            
+            // Highlight the code
+            Prism.highlightElement(codeOutput);
+            
+            // Show success toast
+            showToast("Code generated successfully!", "success");
+            
+            // Show scroll indicator
+            showScrollIndicator();
+        } catch (error) {
+            const codeOutput = document.getElementById("codeOutput");
+            codeOutput.textContent = "Error: " + error.message;
+            codeOutput.classList.remove("generating");
+            
+            // Show error alert
+            showAlert("Failed to generate code: " + error.message, "error", "Generation Error");
+        } finally {
+            // Stop the button animation
+            const generateBtn = document.getElementById("generateBtn");
+            generateBtn.classList.remove("animating");
+        }
+    }
+
+    function copyCode() {
+      navigator.clipboard.writeText(document.getElementById("codeOutput").textContent)
+        .then(() => {
+          const copyBtn = document.querySelector('.btn-secondary');
+          const originalText = copyBtn.innerHTML;
+          copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+          setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+          }, 2000);
+          
+          // Show success toast
+          showToast("Code copied to clipboard!", "success");
+        })
+        .catch(err => {
+          showAlert("Failed to copy code: " + err.message, "error", "Copy Error");
+        });
+    }
+
+    function downloadCode() {
+      const code = document.getElementById("codeOutput").textContent;
+      if (!code.trim()) {
+        showAlert("No code to download.", "warning", "Empty Code");
+        return;
+      }
+      
+      const blob = new Blob([code], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "generated_code.html";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      const downloadBtn = document.querySelector('.btn-info');
+      const originalText = downloadBtn.innerHTML;
+      downloadBtn.innerHTML = '<i class="fas fa-check"></i> Downloaded!';
+      setTimeout(() => {
+        downloadBtn.innerHTML = originalText;
+      }, 2000);
+      
+      // Show success toast
+      showToast("Code downloaded successfully!", "success");
+    }
+
+    function previewCode() {
+      const code = document.getElementById("codeOutput").textContent;
+      if (!code.trim()) {
+        showAlert("No code to preview.", "warning", "Empty Code");
+        return;
+      }
+      
+      const previewWindow = window.open("", "_blank");
+      previewWindow.document.open();
+      previewWindow.document.write(code);
+      previewWindow.document.close();
+      
+      // Show toast
+      showToast("Preview opened in new tab", "info");
+    }
+    
+    // Create floating code symbols for button animation
+    function createCodeSymbols() {
+      const symbolsContainer = document.getElementById('codeSymbols');
+      const symbols = ['{ }', '< >', '( )', ';', '[ ]', '/*', '*/', '// ', '+=', '=>', '&&', '||', '==', '!=', '++'];
+      
+      // Clear existing symbols
+      symbolsContainer.innerHTML = '';
+      
+      // Create new symbols
+      for (let i = 0; i < 15; i++) {
+        const symbol = document.createElement('div');
+        symbol.className = 'code-symbol';
+        symbol.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        
+        // Random position
+        symbol.style.left = `${Math.random() * 90 + 5}%`;
+        
+        // Random animation duration and delay
+        const duration = Math.random() * 2 + 1;
+        const delay = Math.random() * 2;
+        symbol.style.animation = `float-symbol ${duration}s linear infinite ${delay}s`;
+        
+        symbolsContainer.appendChild(symbol);
+      }
+    }
+
+    // Initialize code symbols when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Setup background animations
+      setupBackgroundAnimations();
+      
+      // Create code symbols for button animation
+      createCodeSymbols();
+      
+      // Card entrance animations
+      const cards = document.querySelectorAll('.card');
+      cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          card.style.transition = 'all 0.5s ease';
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, 100 * index);
+      });
+      
+      // Update robot animation functionality
+      const robot = document.getElementById('floatingRobot');
+      const promptCard = document.querySelector('.card.p-4.glow');
+      const outputCard = document.querySelector('.card.p-4.mt-4.glow-effect');
+      const promptInput = document.getElementById('promptInput');
+      const generateBtn = document.getElementById('generateBtn');
+      
+      // Position the robot behind the first card initially
+      function positionRobot() {
+        // Get the current position of the prompt card
+        const cardRect = promptCard.getBoundingClientRect();
+        const scrollY = window.scrollY || window.pageYOffset;
+        
+        // Position relative to the document, not just the viewport
+        robot.style.top = (cardRect.top + scrollY + cardRect.height - 30) + 'px';
+        robot.style.left = (cardRect.left + 30) + 'px';
+      }
+      
+      // Call on load and resize
+      setTimeout(positionRobot, 500); // Delay to ensure card animations complete
+      window.addEventListener('resize', positionRobot);
+      window.addEventListener('scroll', positionRobot);
+      
+      // When user clicks on the prompt input
+      promptInput.addEventListener('focus', function() {
+        const cardRect = promptCard.getBoundingClientRect();
+        const scrollY = window.scrollY || window.pageYOffset;
+        
+        robot.classList.add('active');
+        robot.style.top = (cardRect.top + scrollY - 50) + 'px';
+        robot.style.left = '50%';
+        robot.style.transform = 'translateX(-50%)';
+      });
+      
+      // When user clicks outside the prompt input
+      promptInput.addEventListener('blur', function() {
+        if (!generateBtn.classList.contains('animating')) {
+          robot.classList.remove('active');
+          positionRobot();
+        }
+      });
+      
+      // When user clicks generate button
+      const originalStartGeneration = window.startGeneration;
+      window.startGeneration = function() {
+        // Get the current position of the output card
+        const outputRect = outputCard.getBoundingClientRect();
+        const scrollY = window.scrollY || window.pageYOffset;
+        
+        // Move robot to the output card
+        robot.classList.add('active');
+        robot.style.top = (outputRect.top + scrollY - 50) + 'px';
+        robot.style.left = '50%';
+        robot.style.transform = 'translateX(-50%)';
+        
+        // Call the original function
+        originalStartGeneration();
+        
+        // Reset robot position after generation completes
+        setTimeout(function() {
+          robot.classList.remove('active');
+          positionRobot();
+        }, 5000); // Adjust timing based on your generation process
+      };
+
+      // Add event listener for explanation textarea to auto-resize
+      const explanationTextarea = document.getElementById("explanation");
+      explanationTextarea.addEventListener('input', function() {
+          adjustTextareaHeight(this);
+      });
+      
+      // Initial adjustment for any pre-filled content
+      if (explanationTextarea.value) {
+          adjustTextareaHeight(explanationTextarea);
+      }
+    });
+
+    // Function to show scroll indicator
+    function showScrollIndicator() {
+      const scrollIndicator = document.getElementById('scrollIndicator');
+      scrollIndicator.classList.add('active');
+    }
+    
+    // Function to hide scroll indicator
+    function hideScrollIndicator() {
+      const scrollIndicator = document.getElementById('scrollIndicator');
+      scrollIndicator.classList.remove('active');
+    }
+    
+    // Function to scroll to output
+    function scrollToOutput() {
+      const outputCard = document.querySelector('.card.glow-effect');
+      outputCard.scrollIntoView({ behavior: 'smooth' });
+      
+      // Add a highlight effect to the output card
+      outputCard.style.transition = 'box-shadow 0.5s ease';
+      outputCard.style.boxShadow = '0 0 30px rgba(108, 92, 231, 0.8)';
+      
+      setTimeout(() => {
+        outputCard.style.boxShadow = '';
+      }, 1500);
+    }
+    
+    // Hide scroll indicator when user scrolls manually
+    window.addEventListener('scroll', function() {
+      const outputCard = document.querySelector('.card.glow-effect');
+      const rect = outputCard.getBoundingClientRect();
+      
+      // If output card is in view, hide the indicator
+      if (rect.top < window.innerHeight && rect.bottom >= 0) {
+        hideScrollIndicator();
+      }
+    });
+    
+    document.querySelector('.card.glow-effect').addEventListener('click', function() {
+      hideScrollIndicator();
+    });
+
+    // Make the suggestion button stop pulsing after first hover
+    document.getElementById('suggestionBtn').addEventListener('mouseover', function() {
+      this.classList.remove('pulse-btn');
+    });
+    
+    // Add click functionality to fill in example prompts
+    document.getElementById('suggestionBtn').addEventListener('click', function() {
+      const examples = [
+        "Create a responsive navbar with dropdown menus",
+        "Build a contact form with validation",
+        "Make a dark/light theme toggle button",
+        "Create an image carousel with thumbnails",
+        "Design a pricing table with hover effects"
+      ];
+      
+      // Pick a random example
+      const randomExample = examples[Math.floor(Math.random() * examples.length)];
+      document.getElementById('promptInput').value = randomExample;
+      
+      // Show a toast notification
+      showToast("Example prompt added! Click Generate to try it.", "info");
+    });
+
+    // Function to load example templates
+    function loadExample(exampleType) {
+      // Example templates
+      const examples = {
+        'responsive-layout': "Create a responsive grid layout with header, sidebar, main content and footer that adapts to mobile, tablet and desktop screens",
+        'user-auth': "Build a user login and registration form with client-side validation and password strength meter",
+        'ecommerce': "Create a product listing page with filter options, shopping cart functionality and checkout form",
+        'data-viz': "Generate a dashboard with bar charts, line graphs and pie charts using Chart.js",
+        'image-gallery': "Build a responsive image gallery with lightbox effect and thumbnail navigation",
+        'mobile-ui': "Create a mobile app interface with bottom navigation, swipeable cards and pull-to-refresh"
+      };
+      
+      // Set the prompt input value to the selected example
+      document.getElementById('promptInput').value = examples[exampleType];
+      
+      // Scroll to the prompt input
+      document.querySelector('.card.p-4.glow').scrollIntoView({ behavior: 'smooth' });
+      
+      // Focus the input
+      setTimeout(() => {
+        document.getElementById('promptInput').focus();
+      }, 800);
+      
+      // Show toast notification
+      showToast(`Example loaded: ${exampleType.replace('-', ' ')}`, "success");
+    }
+
+    // Function to scroll to the generator section
+    function scrollToGenerator() {
+      const generatorCard = document.querySelector('.card.p-4.glow');
+      generatorCard.scrollIntoView({ behavior: 'smooth' });
+      
+      // Add a highlight effect to the generator card
+      generatorCard.style.transition = 'box-shadow 0.5s ease';
+      generatorCard.style.boxShadow = '0 0 30px rgba(108, 92, 231, 0.8)';
+      
+      setTimeout(() => {
+        generatorCard.style.boxShadow = '';
+      }, 1500);
+      
+      // Focus on the input field
+      setTimeout(() => {
+        document.getElementById('promptInput').focus();
+      }, 800);
+    }
+
+    // Function to scroll to the About Me section
+    function scrollToAboutMe() {
+      const aboutMeSection = document.querySelector('.credit-section');
+      aboutMeSection.scrollIntoView({ behavior: 'smooth' });
+      
+      // Add a highlight effect to the About Me section
+      const creatorInfo = document.querySelector('.creator-info');
+      creatorInfo.style.transition = 'box-shadow 0.5s ease';
+      creatorInfo.style.boxShadow = '0 0 30px rgba(108, 92, 231, 0.8)';
+      
+      setTimeout(() => {
+        creatorInfo.style.boxShadow = '';
+      }, 1500);
+    }
+  </script>
+</body>
+</html>
+
