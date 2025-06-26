@@ -6,7 +6,7 @@ function App() {
     const [generatedCode, setGeneratedCode] = useState("");
 
     const handleGenerate = async () => {
-        const response = await fetch("https://zoro-ai.onrender.com/generate", {
+        const response = await fetch(BACKEND_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ prompt }),
