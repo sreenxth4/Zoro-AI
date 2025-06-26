@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)  # Enable cross-origin requests
 
 # Configure Google Generative AI API with your actual API key
-API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyDQJY4PJy-w6C3HnsaB9YZlHAkOu2btKaU")  # Replace with your real key
+API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=API_KEY)
 
 @app.route("/", methods=["GET"])
