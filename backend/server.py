@@ -3,12 +3,13 @@ from flask_cors import CORS
 import google.generativeai as genai
 import os
 import re
+import traceback
 
 app = Flask(__name__)
 CORS(app)  # Enable cross-origin requests
 
 # Configure Google Generative AI API with your actual API key
-API_KEY = os.getenv("GEMINI_API_KEY")
+API_KEY = os.getenv("GEMINI_API_KEY")  # Replace with your real key
 genai.configure(api_key=API_KEY)
 
 @app.route("/", methods=["GET"])
@@ -52,7 +53,8 @@ def generate_code():
             "explanation": explanation
         })
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    traceback.print_exc()  # This will print the full error in Render logs
+    return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
